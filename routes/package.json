@@ -1,0 +1,11 @@
+{
+  "name": "yikyak",
+  "version": "1.0.0",
+  "description": "Full stack tutorial based on Yik Yak",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

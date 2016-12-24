@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Create a comment</h1>
+    <form action="/api/comment" method="post">
+        <input type="text" name="username" placeholder="Username" />
+        <br/>
+        <input type="text" name="body" placeholder="Body" />
+        <br/>
+        <input type="text" name="timestamp" placeholder="TimeStamp" />
+        <br/>
+        <input type="submit" value="Create Comment" />
+    </form>
+  </body>
+</html>
