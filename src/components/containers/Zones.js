@@ -3,7 +3,7 @@
 "use strict"; // maybe need this?
 import React, { Component } from 'react';
 import Zone from '../presentation/Zone';
-import superagent from 'superagent';
+import { ApiManager } from '../../utils/ApiManager';
 
 //var tempList = [1,2,3];
 
@@ -28,7 +28,16 @@ class Zones extends Component {
 	// override this function
 	componentDidMount(){
 		console.log('componentDidMount: ');
-		superagent
+		ApiManager.get('api/zone', null, (err, response) =>{
+			if (err) { alert("Error: " + err); return;}
+			
+			console.log('RESULTS: ' + JSON.stringify(response.results));
+			
+			this.setState({
+					list: response.results.body
+				})
+		})
+		/*superagent
 			.get('api/zone')
 			.query(null)
 			.set('Accept', 'application/json')
@@ -42,7 +51,7 @@ class Zones extends Component {
 					list: results
 				})
 			})
-		
+		*/
 	}
 	
 	updateZone(event){
@@ -57,11 +66,22 @@ class Zones extends Component {
 	
 	addZone(){
 		console.log('add zone: ' + event.target.zone);
-		let updatedList = Object.assign([], this.state.list);
+		let updatedZone = Object.assign({}, this.state.zone);
+		// set ZipCodes to be an array - break up the string
+		updatedZone['zipCodes'] = updatedZone.zipCode.split(',');
+		
+		ApiManager.post('/api/zone', updatedZone, (err, response) => {
+			if (err) { alert("Error: " + err); return;}
+			
+			console.log('Creating a ZONE...' + response);
+		})
+		
+		// This adds a Zone to the local state
+		/*let updatedList = Object.assign([], this.state.list);
 		updatedList.push(this.state.zone);
 		this.setState({
 			list: updatedList
-		})
+		})*/
 
 	}
 	render() {

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Comment from '../presentation/Comment';
 import styles from '../layout/styles';
+import { ApiManager } from '../../utils/ApiManager';
 
 class Comments extends Component {
     constructor(){
@@ -48,6 +49,21 @@ class Comments extends Component {
         });
     }
     
+    // override this function
+	componentDidMount(){
+		console.log('componentDidMount: ');
+		ApiManager.get('api/comment', null, (err, response) =>{
+			if (err) { alert("Error: " + err); return;}
+			
+			console.log('RESULTS: ' + JSON.stringify(response.results));
+			
+			this.setState({
+					list: response.results.body
+				})
+		})
+	
+	}
+	
     submitComment(){
         console.log("Submitting comment" + JSON.stringify(this.state.comment));
         let updatedList = Object.assign([], this.state.list);

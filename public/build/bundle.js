@@ -84,7 +84,11 @@
 	            return _react2.default.createElement(
 	                'div',
 	                null,
-	                'Yik Yak!',
+	                _react2.default.createElement(
+	                    'h2',
+	                    null,
+	                    'Yik Yak!'
+	                ),
 	                _react2.default.createElement(_Home2.default, null)
 	            );
 	        }
@@ -21818,7 +21822,7 @@
 	
 	var _Zones2 = _interopRequireDefault(_Zones);
 	
-	var _Comments = __webpack_require__(187);
+	var _Comments = __webpack_require__(195);
 	
 	var _Comments2 = _interopRequireDefault(_Comments);
 	
@@ -21890,9 +21894,7 @@
 	
 	var _Zone2 = _interopRequireDefault(_Zone);
 	
-	var _superagent = __webpack_require__(189);
-	
-	var _superagent2 = _interopRequireDefault(_superagent);
+	var _ApiManager = __webpack_require__(187);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -21937,18 +21939,32 @@
 				var _this2 = this;
 	
 				console.log('componentDidMount: ');
-				_superagent2.default.get('api/zone').query(null).set('Accept', 'application/json').end(function (err, response) {
+				_ApiManager.ApiManager.get('api/zone', null, function (err, response) {
 					if (err) {
 						alert("Error: " + err);return;
 					}
-					console.log(JSON.stringify(response.body));
 	
-					var results = response.body.message;
+					console.log('RESULTS: ' + JSON.stringify(response.results));
 	
 					_this2.setState({
-						list: results
+						list: response.results.body
 					});
 				});
+				/*superagent
+	   	.get('api/zone')
+	   	.query(null)
+	   	.set('Accept', 'application/json')
+	   	.end((err, response) => {
+	   		if (err) { alert("Error: " + err); return;}
+	   		console.log(JSON.stringify(response.body));
+	   		
+	   		let results = response.body.message;
+	   		
+	   		this.setState({
+	   			list: results
+	   		})
+	   	})
+	   */
 			}
 		}, {
 			key: 'updateZone',
@@ -21965,11 +21981,24 @@
 			key: 'addZone',
 			value: function addZone() {
 				console.log('add zone: ' + event.target.zone);
-				var updatedList = Object.assign([], this.state.list);
-				updatedList.push(this.state.zone);
-				this.setState({
-					list: updatedList
+				var updatedZone = Object.assign({}, this.state.zone);
+				// set ZipCodes to be an array - break up the string
+				updatedZone['zipCodes'] = updatedZone.zipCode.split(',');
+	
+				_ApiManager.ApiManager.post('/api/zone', updatedZone, function (err, response) {
+					if (err) {
+						alert("Error: " + err);return;
+					}
+	
+					console.log('Creating a ZONE...' + response);
 				});
+	
+				// This adds a Zone to the local state
+				/*let updatedList = Object.assign([], this.state.list);
+	   updatedList.push(this.state.zone);
+	   this.setState({
+	   	list: updatedList
+	   })*/
 			}
 		}, {
 			key: 'render',
@@ -22137,210 +22166,54 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	    value: true
+					value: true
 	});
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	var _superagent = __webpack_require__(188);
 	
-	var _react = __webpack_require__(1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _Comment = __webpack_require__(188);
-	
-	var _Comment2 = _interopRequireDefault(_Comment);
-	
-	var _styles = __webpack_require__(186);
-	
-	var _styles2 = _interopRequireDefault(_styles);
+	var _superagent2 = _interopRequireDefault(_superagent);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Comments = function (_Component) {
-	    _inherits(Comments, _Component);
-	
-	    function Comments() {
-	        _classCallCheck(this, Comments);
-	
-	        var _this = _possibleConstructorReturn(this, (Comments.__proto__ || Object.getPrototypeOf(Comments)).call(this));
-	
-	        _this.state = {
-	            comment: {
-	                username: '',
-	                body: '',
-	                timestamp: '0:00'
-	            },
-	            list: [{ body: 'a funny thing', username: 'TrumpD', timestamp: '10:30' }, { body: 'well there goes number 4', username: 'BradshawT', timestamp: '10:32' }, { body: 'fantastic performance by Wales', username: 'SavageR', timestamp: '12:05' }]
-	        };
-	        return _this;
-	    }
-	
-	    _createClass(Comments, [{
-	        key: 'updateUsername',
-	        value: function updateUsername(event) {
-	            console.log("updating username: " + event.target.value);
-	            // WRONG!!! Never mutate state!!
-	            // this.state.comment['username'] =event.target.value; 
-	            var updatedComment = Object.assign({}, this.state.comment);
-	            updatedComment['username'] = event.target.value;
-	
-	            this.setState({
-	                comment: updatedComment
-	            });
-	        }
-	    }, {
-	        key: 'updateBody',
-	        value: function updateBody(event) {
-	            var updatedContent = Object.assign({}, this.state.comment);
-	            updatedContent['body'] = event.target.value;
-	            this.setState({
-	                comment: updatedContent
-	            });
-	        }
-	    }, {
-	        key: 'updateTimestamp',
-	        value: function updateTimestamp(event) {
-	            var updatedContent = Object.assign({}, this.state.comment);
-	            updatedContent['timestamp'] = event.target.value;
-	            this.setState({
-	                comment: updatedContent
-	            });
-	        }
-	    }, {
-	        key: 'submitComment',
-	        value: function submitComment() {
-	            console.log("Submitting comment" + JSON.stringify(this.state.comment));
-	            var updatedList = Object.assign([], this.state.list);
-	            updatedList.push(this.state.comment);
-	
-	            this.setState({
-	                list: updatedList
-	            });
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var commentStyle = _styles2.default.comment;
-	            var commentList = this.state.list.map(function (comment, i) {
-	                return _react2.default.createElement(
-	                    'li',
-	                    { key: i },
-	                    _react2.default.createElement(_Comment2.default, { currentComment: comment })
-	                );
-	            });
-	            return _react2.default.createElement(
-	                'div',
-	                null,
-	                _react2.default.createElement(
-	                    'h2',
-	                    null,
-	                    'Comments: Zone [1]'
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { style: commentStyle.commentsBox },
-	                    _react2.default.createElement(
-	                        'ul',
-	                        { style: commentStyle.commentList },
-	                        commentList
-	                    ),
-	                    'Add a comment:',
-	                    _react2.default.createElement('br', null),
-	                    _react2.default.createElement('input', { onChange: this.updateUsername.bind(this), className: 'form-control', type: 'text', placeholder: 'Username' }),
-	                    _react2.default.createElement('br', null),
-	                    _react2.default.createElement('input', { onChange: this.updateBody.bind(this), className: 'form-control', type: 'text', placeholder: 'Comment' }),
-	                    _react2.default.createElement('br', null),
-	                    _react2.default.createElement('input', { onChange: this.updateTimestamp.bind(this), className: 'form-control', type: 'text', placeholder: 'Time' }),
-	                    _react2.default.createElement('br', null),
-	                    _react2.default.createElement(
-	                        'button',
-	                        { onClick: this.submitComment.bind(this), className: 'btn btn-info' },
-	                        'Send'
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-	
-	    return Comments;
-	}(_react.Component);
-	
-	exports.default = Comments;
+	exports.default = {
+					get: function get(url, params, callback) {
+									_superagent2.default.get(url).query(params).set('Accept', 'application/json').end(function (err, response) {
+													if (err) {
+																	callback(err, null);
+																	return;
+													}
+													// here check for API failures
+													var confirmation = response.body.confirmation;
+													if (confirmation != 'success') {
+																	// send a failure message
+																	callback({ message: response.body.message, null: null });
+																	return;
+													}
+													callback(response, response.body);
+									});
+					},
+					post: function post(url, body, callback) {
+									_superagent2.default.post(url).send(body).set('Accept', 'application/json').end(function (err, response) {
+													if (err) {
+																	callback(err, null);
+																	return;
+													}
+													// here check for API failures
+													var confirmation = response.body.confirmation;
+													if (confirmation != 'success') {
+																	// send a failure message
+																	callback({ message: response.body.message, null: null });
+																	return;
+													}
+													callback(response, response.body);
+									});
+					},
+					put: function put() {},
+					del: function del() {}
+	};
 
 /***/ },
 /* 188 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _styles = __webpack_require__(186);
-	
-	var _styles2 = _interopRequireDefault(_styles);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Comment = function (_Component) {
-	    _inherits(Comment, _Component);
-	
-	    function Comment() {
-	        _classCallCheck(this, Comment);
-	
-	        return _possibleConstructorReturn(this, (Comment.__proto__ || Object.getPrototypeOf(Comment)).apply(this, arguments));
-	    }
-	
-	    _createClass(Comment, [{
-	        key: 'render',
-	        value: function render() {
-	            return _react2.default.createElement(
-	                'div',
-	                null,
-	                _react2.default.createElement(
-	                    'p',
-	                    { style: { fontSize: 16, fontWeight: 600 } },
-	                    this.props.currentComment.body
-	                ),
-	                _react2.default.createElement(
-	                    'p',
-	                    null,
-	                    '[',
-	                    this.props.currentComment.username,
-	                    '] at\xA0',
-	                    this.props.currentComment.timestamp
-	                ),
-	                _react2.default.createElement('hr', null)
-	            );
-	        }
-	    }]);
-	
-	    return Comment;
-	}(_react.Component);
-	
-	exports.default = Comment;
-
-/***/ },
-/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -22357,11 +22230,11 @@
 	  root = this;
 	}
 	
-	var Emitter = __webpack_require__(190);
-	var RequestBase = __webpack_require__(191);
-	var isObject = __webpack_require__(192);
-	var isFunction = __webpack_require__(193);
-	var ResponseBase = __webpack_require__(194);
+	var Emitter = __webpack_require__(189);
+	var RequestBase = __webpack_require__(190);
+	var isObject = __webpack_require__(191);
+	var isFunction = __webpack_require__(192);
+	var ResponseBase = __webpack_require__(193);
 	
 	/**
 	 * Noop.
@@ -23250,7 +23123,7 @@
 
 
 /***/ },
-/* 190 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -23419,13 +23292,13 @@
 
 
 /***/ },
-/* 191 */
+/* 190 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module of mixed-in functions shared between node and client code
 	 */
-	var isObject = __webpack_require__(192);
+	var isObject = __webpack_require__(191);
 	
 	/**
 	 * Expose `RequestBase`.
@@ -23959,7 +23832,7 @@
 
 
 /***/ },
-/* 192 */
+/* 191 */
 /***/ function(module, exports) {
 
 	/**
@@ -23978,7 +23851,7 @@
 
 
 /***/ },
-/* 193 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -23988,7 +23861,7 @@
 	 * @return {Boolean}
 	 * @api private
 	 */
-	var isObject = __webpack_require__(192);
+	var isObject = __webpack_require__(191);
 	
 	function isFunction(fn) {
 	  var tag = isObject(fn) ? Object.prototype.toString.call(fn) : '';
@@ -23999,7 +23872,7 @@
 
 
 /***/ },
-/* 194 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -24007,7 +23880,7 @@
 	 * Module dependencies.
 	 */
 	
-	var utils = __webpack_require__(195);
+	var utils = __webpack_require__(194);
 	
 	/**
 	 * Expose `ResponseBase`.
@@ -24138,7 +24011,7 @@
 
 
 /***/ },
-/* 195 */
+/* 194 */
 /***/ function(module, exports) {
 
 	
@@ -24210,6 +24083,238 @@
 	  return header;
 	};
 
+
+/***/ },
+/* 195 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _Comment = __webpack_require__(196);
+	
+	var _Comment2 = _interopRequireDefault(_Comment);
+	
+	var _styles = __webpack_require__(186);
+	
+	var _styles2 = _interopRequireDefault(_styles);
+	
+	var _ApiManager = __webpack_require__(187);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Comments = function (_Component) {
+	    _inherits(Comments, _Component);
+	
+	    function Comments() {
+	        _classCallCheck(this, Comments);
+	
+	        var _this = _possibleConstructorReturn(this, (Comments.__proto__ || Object.getPrototypeOf(Comments)).call(this));
+	
+	        _this.state = {
+	            comment: {
+	                username: '',
+	                body: '',
+	                timestamp: '0:00'
+	            },
+	            list: [{ body: 'a funny thing', username: 'TrumpD', timestamp: '10:30' }, { body: 'well there goes number 4', username: 'BradshawT', timestamp: '10:32' }, { body: 'fantastic performance by Wales', username: 'SavageR', timestamp: '12:05' }]
+	        };
+	        return _this;
+	    }
+	
+	    _createClass(Comments, [{
+	        key: 'updateUsername',
+	        value: function updateUsername(event) {
+	            console.log("updating username: " + event.target.value);
+	            // WRONG!!! Never mutate state!!
+	            // this.state.comment['username'] =event.target.value; 
+	            var updatedComment = Object.assign({}, this.state.comment);
+	            updatedComment['username'] = event.target.value;
+	
+	            this.setState({
+	                comment: updatedComment
+	            });
+	        }
+	    }, {
+	        key: 'updateBody',
+	        value: function updateBody(event) {
+	            var updatedContent = Object.assign({}, this.state.comment);
+	            updatedContent['body'] = event.target.value;
+	            this.setState({
+	                comment: updatedContent
+	            });
+	        }
+	    }, {
+	        key: 'updateTimestamp',
+	        value: function updateTimestamp(event) {
+	            var updatedContent = Object.assign({}, this.state.comment);
+	            updatedContent['timestamp'] = event.target.value;
+	            this.setState({
+	                comment: updatedContent
+	            });
+	        }
+	
+	        // override this function
+	
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var _this2 = this;
+	
+	            console.log('componentDidMount: ');
+	            _ApiManager.ApiManager.get('api/comment', null, function (err, response) {
+	                if (err) {
+	                    alert("Error: " + err);return;
+	                }
+	
+	                console.log('RESULTS: ' + JSON.stringify(response.results));
+	
+	                _this2.setState({
+	                    list: response.results.body
+	                });
+	            });
+	        }
+	    }, {
+	        key: 'submitComment',
+	        value: function submitComment() {
+	            console.log("Submitting comment" + JSON.stringify(this.state.comment));
+	            var updatedList = Object.assign([], this.state.list);
+	            updatedList.push(this.state.comment);
+	
+	            this.setState({
+	                list: updatedList
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var commentStyle = _styles2.default.comment;
+	            var commentList = this.state.list.map(function (comment, i) {
+	                return _react2.default.createElement(
+	                    'li',
+	                    { key: i },
+	                    _react2.default.createElement(_Comment2.default, { currentComment: comment })
+	                );
+	            });
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    'h2',
+	                    null,
+	                    'Comments: Zone [1]'
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { style: commentStyle.commentsBox },
+	                    _react2.default.createElement(
+	                        'ul',
+	                        { style: commentStyle.commentList },
+	                        commentList
+	                    ),
+	                    'Add a comment:',
+	                    _react2.default.createElement('br', null),
+	                    _react2.default.createElement('input', { onChange: this.updateUsername.bind(this), className: 'form-control', type: 'text', placeholder: 'Username' }),
+	                    _react2.default.createElement('br', null),
+	                    _react2.default.createElement('input', { onChange: this.updateBody.bind(this), className: 'form-control', type: 'text', placeholder: 'Comment' }),
+	                    _react2.default.createElement('br', null),
+	                    _react2.default.createElement('input', { onChange: this.updateTimestamp.bind(this), className: 'form-control', type: 'text', placeholder: 'Time' }),
+	                    _react2.default.createElement('br', null),
+	                    _react2.default.createElement(
+	                        'button',
+	                        { onClick: this.submitComment.bind(this), className: 'btn btn-info' },
+	                        'Send'
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+	
+	    return Comments;
+	}(_react.Component);
+	
+	exports.default = Comments;
+
+/***/ },
+/* 196 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _styles = __webpack_require__(186);
+	
+	var _styles2 = _interopRequireDefault(_styles);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Comment = function (_Component) {
+	    _inherits(Comment, _Component);
+	
+	    function Comment() {
+	        _classCallCheck(this, Comment);
+	
+	        return _possibleConstructorReturn(this, (Comment.__proto__ || Object.getPrototypeOf(Comment)).apply(this, arguments));
+	    }
+	
+	    _createClass(Comment, [{
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    'p',
+	                    { style: { fontSize: 16, fontWeight: 600 } },
+	                    this.props.currentComment.body
+	                ),
+	                _react2.default.createElement(
+	                    'p',
+	                    null,
+	                    '[',
+	                    this.props.currentComment.username,
+	                    '] at\xA0',
+	                    this.props.currentComment.timestamp
+	                ),
+	                _react2.default.createElement('hr', null)
+	            );
+	        }
+	    }]);
+	
+	    return Comment;
+	}(_react.Component);
+	
+	exports.default = Comment;
 
 /***/ }
 /******/ ]);
