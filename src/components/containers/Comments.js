@@ -1,77 +1,49 @@
 import React, { Component } from 'react'
 import Comment from '../presentation/Comment';
+import CreateComment from '../presentation/CreateComment';
 import styles from '../layout/styles';
-import { ApiManager } from '../../utils/ApiManager';
+import Api from '../../utils/ApiManager';
 
 class Comments extends Component {
-    constructor(){
-        super()
-            this.state = {
-                comment:{
-                    username: '',
-                    body: '',
-                    timestamp: '0:00'
-                },
-                list:[
-                    {body:'a funny thing', username:'TrumpD', timestamp:'10:30'},
-                    {body:'well there goes number 4', username:'BradshawT', timestamp:'10:32'},
-                    {body:'fantastic performance by Wales', username:'SavageR', timestamp:'12:05'}
-                ]
-        };
-    }
-    
-    
-    updateUsername(event){
-        console.log("updating username: " + event.target.value);
-        // WRONG!!! Never mutate state!!
-        // this.state.comment['username'] =event.target.value; 
-        let updatedComment = Object.assign({}, this.state.comment);
-        updatedComment['username'] = event.target.value;
-        
-        this.setState({
-            comment: updatedComment
-        });
-    }
-    
-    updateBody(event) {
-        let updatedContent = Object.assign({}, this.state.comment);
-        updatedContent['body'] = event.target.value;
-        this.setState({
-            comment: updatedContent
-        });
-    }
-    
-    updateTimestamp(event) {
-        let updatedContent = Object.assign({}, this.state.comment);
-        updatedContent['timestamp'] = event.target.value;
-        this.setState({
-            comment: updatedContent
-        });
-    }
-    
+	constructor(props) {
+		super(props)
+		this.state = {
+			list: []
+		}
+	}
     // override this function
 	componentDidMount(){
-		console.log('componentDidMount: ');
-		ApiManager.get('api/comment', null, (err, response) =>{
+	    let currComponent = this;
+		console.log('Comments componentDidMount: ');
+		Api.get('/api/comment', null, function(err, response) {
 			if (err) { alert("Error: " + err); return;}
 			
-			console.log('RESULTS: ' + JSON.stringify(response.results));
-			
-			this.setState({
-					list: response.results.body
-				})
+			console.log('RESULTS: ' + JSON.stringify(response.message));
+
+            
+            currComponent.setState({
+                list: response.message
+            })
 		})
 	
 	}
 	
-    submitComment(){
-        console.log("Submitting comment" + JSON.stringify(this.state.comment));
-        let updatedList = Object.assign([], this.state.list);
-        updatedList.push(this.state.comment);
+
+    submitComment(comment){
+        console.log("Submitting comment" + JSON.stringify(comment));
         
-        this.setState({
-            list: updatedList
+        let updatedComment =Object.assign({}, comment);
+        Api.post('/api/comment', updatedComment, (err, response) => {
+            if(err) {alert(err); return;}
+            
+            let updatedList = Object.assign([], this.state.list);
+            updatedList.push(response.message);
+
+            this.setState({
+                list: updatedList
+            })
         })
+        
     }
     
     
@@ -84,18 +56,11 @@ class Comments extends Component {
         });
         return (
             <div>
-                <h2>Comments: Zone [1]</h2>
+                <h2>Comments for ...Zone [1]</h2>
                 <div style={commentStyle.commentsBox}>
                     <ul style={commentStyle.commentList}>{commentList}</ul>
-                    Add a comment:<br/>
-                    <input onChange={this.updateUsername.bind(this)} className="form-control" type="text" placeholder="Username"/>
-                    <br/>
-                    <input onChange={this.updateBody.bind(this)} className="form-control" type="text" placeholder="Comment"/>
-                    <br/>
-                    <input onChange={this.updateTimestamp.bind(this)} className="form-control" type="text" placeholder="Time"/>
-                    <br/>
-                    <button onClick={this.submitComment.bind(this)} className="btn btn-info" >Send</button>
                 </div>
+                <CreateComment onCreate={this.submitComment.bind(this)} />
             </div>
         )
     }

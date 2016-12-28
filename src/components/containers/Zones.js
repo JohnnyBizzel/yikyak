@@ -1,9 +1,10 @@
 // render a list of Zones
 // a Container component (will perform CRUD)
-"use strict"; // maybe need this?
+//"use strict"; // maybe need this?
 import React, { Component } from 'react';
 import Zone from '../presentation/Zone';
-import { ApiManager } from '../../utils/ApiManager';
+import CreateZone from '../presentation/CreateZone';
+import Api from '../../utils/ApiManager';
 
 //var tempList = [1,2,3];
 
@@ -11,47 +12,43 @@ class Zones extends Component {
 	constructor() {
 		super()
 		this.state = {
-			zone:{
-				name:'',
-				zipCodes:''
-			},
+			selected: 0,
 			list: []
 		}
 	}
-	/* Dummy data
-	{name:'Zone 1', zipCode:'10101',numComments:10},
-				{name:'Zone 2', zipCode:'10012',numComments:20},
-				{name:'Zone 3', zipCode:'90210',numComments:30},
-				{name:'Zone 4', zipCode:'60077',numComments:40}
-	*/
+
 	
 	// override this function
 	componentDidMount(){
 		console.log('componentDidMount: ');
-		ApiManager.get('api/zone', null, (err, response) =>{
-			if (err) { alert("Error: " + err); return;}
+		Api.get('/api/zone', null, (err, response) => {
+			if (err) { 
+				alert("Error: " + err); 
+				return;
+			}
 			
-			console.log('RESULTS: ' + JSON.stringify(response.results));
+			console.log('RESULTS: ' + JSON.stringify(response.message));
 			
 			this.setState({
-					list: response.results.body
-				})
-		})
-		/*superagent
-			.get('api/zone')
-			.query(null)
-			.set('Accept', 'application/json')
-			.end((err, response) => {
-				if (err) { alert("Error: " + err); return;}
-				console.log(JSON.stringify(response.body));
+					list: response.message
+				});
+		});
+	
+		// /*superagent
+		// 	.get('api/zone')
+		// 	.query(null)
+		// 	.set('Accept', 'application/json')
+		// 	.end((err, response) => {
+		// 		if (err) { alert("Error: " + err); return;}
+		// 		console.log(JSON.stringify(response.body));
 				
-				let results = response.body.message;
+		// 		let results = response.body.message;
 				
-				this.setState({
-					list: results
-				})
-			})
-		*/
+		// 		this.setState({
+		// 			list: results
+		// 		})
+		// 	})
+		// */
 	}
 	
 	updateZone(event){
@@ -64,16 +61,22 @@ class Zones extends Component {
 		})
 	}
 	
-	addZone(){
-		console.log('add zone: ' + event.target.zone);
-		let updatedZone = Object.assign({}, this.state.zone);
+	addZone(newZone){
+		console.log('add zone: ' + newZone);
+		let updatedZone = Object.assign({}, newZone);
 		// set ZipCodes to be an array - break up the string
 		updatedZone['zipCodes'] = updatedZone.zipCode.split(',');
 		
-		ApiManager.post('/api/zone', updatedZone, (err, response) => {
+		Api.post('/api/zone', updatedZone, (err, response) => {
 			if (err) { alert("Error: " + err); return;}
 			
 			console.log('Creating a ZONE...' + response);
+			let updatedList = Object.assign([], this.state.list);
+            updatedList.push(response.result);
+            
+            this.setState({
+                list: updatedList
+            })
 		})
 		
 		// This adds a Zone to the local state
@@ -89,7 +92,7 @@ class Zones extends Component {
 
 		const listItems = this.state.list.map((zone, i) =>  {
 			return (
-				<li>
+				<li key={i}>
 					<Zone currentZone={zone} /> 
 				</li>
 			)
@@ -101,15 +104,8 @@ class Zones extends Component {
 				<ol>
 				   {listItems}
 				</ol>
-			
-			 Add a Zone:<br/>
-                    <input id="name" onChange={this.updateZone.bind(this)} className="form-control" type="text" placeholder="Name"/>
-                    <br/>
-                    <input id="zip" onChange={this.updateZone.bind(this)} className="form-control" type="text" placeholder="Zip Code"/>
-                    <br/>
-                    
-                    <br/>
-                    <button onClick={this.addZone.bind(this)} className="btn btn-info" >Add Zone</button>
+				
+				<CreateZone onCreate={this.addZone.bind(this)} />
 			</div>
 	)}
 	
