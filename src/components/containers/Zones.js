@@ -21,6 +21,8 @@ class Zones extends Component {
 	// override this function
 	componentDidMount(){
 		console.log('componentDidMount: ');
+		
+		// Do the /*superagent*/ request...
 		Api.get('/api/zone', null, (err, response) => {
 			if (err) { 
 				alert("Error: " + err); 
@@ -34,49 +36,36 @@ class Zones extends Component {
 				});
 		});
 	
-		// /*superagent
-		// 	.get('api/zone')
-		// 	.query(null)
-		// 	.set('Accept', 'application/json')
-		// 	.end((err, response) => {
-		// 		if (err) { alert("Error: " + err); return;}
-		// 		console.log(JSON.stringify(response.body));
-				
-		// 		let results = response.body.message;
-				
-		// 		this.setState({
-		// 			list: results
-		// 		})
-		// 	})
-		// */
+	
+	
 	}
 	
-	updateZone(event){
-		console.log('update zone: ' + event.target.id + ' = ' + event.target.value);
-		let updatedZone = Object.assign({}, this.state.zone);
-		updatedZone[event.target.id] = event.target.value;
-		// change the state
-		this.setState({
-			zone: updatedZone
-		})
-	}
+	// updateZone(event){
+	// 	console.log('update zone: ' + event.target.id + ' = ' + event.target.value);
+	// 	let updatedZone = Object.assign({}, this.state.zone);
+	// 	updatedZone[event.target.id] = event.target.value;
+	// 	// change the state
+	// 	this.setState({
+	// 		zone: updatedZone
+	// 	})
+	// }
 	
 	addZone(newZone){
-		console.log('add zone: ' + newZone);
+		console.log('add zone: ' + JSON.stringify(newZone));
 		let updatedZone = Object.assign({}, newZone);
-		// set ZipCodes to be an array - break up the string
-		updatedZone['zipCodes'] = updatedZone.zipCode.split(',');
+		
 		
 		Api.post('/api/zone', updatedZone, (err, response) => {
-			if (err) { alert("Error: " + err); return;}
+			if (err) { alert("Error: (api/post) in Zones... " + JSON.stringify(err)); return;}
 			
 			console.log('Creating a ZONE...' + response);
 			let updatedList = Object.assign([], this.state.list);
-            updatedList.push(response.result);
+            updatedList.push(response.message);
             
             this.setState({
                 list: updatedList
             })
+            
 		})
 		
 		// This adds a Zone to the local state

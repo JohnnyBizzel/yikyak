@@ -2,16 +2,18 @@ import React, { Component } from 'react';
 import Comment from './Comment';
 import Api from '../../utils/ApiManager';
 
-//var tempList = [1,2,3];
+// THIS IS A Presentation component AND SHOULD PASS THE DATA BACK TO
+// IT'S PARENT the container WHERE THE AIP CALL WILL TAKE PLACE (USING A PROP FUNC)
 
 class CreateComment extends Component {
     constructor(){
         super()
             this.state = {
-                comment:{
-                    username: '',
-                    body: ''
-                }
+                // comment:{
+                //     username: '',
+                //     body: ''
+                // },
+                list: []
         };
     }
     
@@ -19,6 +21,7 @@ class CreateComment extends Component {
 
         // WRONG!!! Never mutate state!!
         // this.state.comment['username'] =event.target.value; 
+        console.log("Updating comment");
         let updatedComment = Object.assign({}, this.state.comment);
         updatedComment[event.target.id] = event.target.value;
 
@@ -52,3 +55,5 @@ class CreateComment extends Component {
 }
         /* Removed Timestamp field : /*  <!-- input onChange={this.updateTimestamp.bind(this)} className="form-control" type="text" placeholder="Time"/ -->*/
 export default CreateComment
+
+// PROGRESS 1:12:45 into video

@@ -74,10 +74,11 @@ router.post("/:resource", function(req, res, next){
     }
     
     controller.create(req.body, function(err, result) {
-         if (err){
+        if (err){
             res.json({ confirmation: 'fail',
                 message: err
             });
+            console.log(err);
             return;
         }
         

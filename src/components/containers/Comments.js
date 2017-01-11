@@ -31,11 +31,12 @@ class Comments extends Component {
 
     submitComment(comment){
         console.log("Submitting comment" + JSON.stringify(comment));
-        
+        //let updatedComment =Object.assign({}, this.state.comment);
         let updatedComment =Object.assign({}, comment);
         Api.post('/api/comment', updatedComment, (err, response) => {
-            if(err) {alert(err); return;}
+            if(err) {alert(JSON.stringify(err)); return;}
             
+            console.log(response.message);
             let updatedList = Object.assign([], this.state.list);
             updatedList.push(response.message);
 

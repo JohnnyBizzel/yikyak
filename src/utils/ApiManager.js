@@ -28,16 +28,21 @@ export default {
             .set('Accept', 'application/json')
             .end((err, response) => {
                 if (err) { 
+                	console.log(err);
 				    callback(err, null);
 				    return;}
 				// here check for API failures
 				const confirmation = response.body.confirmation;
-				if (confirmation != 'success') {
-				    // send a failure message
-				    callback({message:response.body.message, null});
+				if (confirmation != 'success') { // NOT a Success??
+					// send a failure message
+						console.log('Not a success in *post*');
+						callback({message:response.body.message, null});
+				    
 				    return;
 				}
-				callback(response, response.body);
+				// Worked!
+				callback(null, response.body);
+				
             })
         
     },
