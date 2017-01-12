@@ -9,6 +9,9 @@ import Api from '../../utils/ApiManager';
 //var tempList = [1,2,3];
 
 class Zones extends Component {
+	
+	// This state needs sharing with Comments
+	// This is where REDUX comes in to save the day :)
 	constructor() {
 		super()
 		this.state = {
@@ -76,13 +79,21 @@ class Zones extends Component {
 		})*/
 
 	}
+	
+	onSelectTitle(index) {
+		console.log("Selected Zone status");
+		this.setState({ selected :  index});
+	}
+	
 	render() {
 	//const listItems = this.state.list.map((zone,i)=>{
 
 		const listItems = this.state.list.map((zone, i) =>  {
+			let selected = (i == this.state.selected)
 			return (
 				<li key={i}>
-					<Zone currentZone={zone} /> 
+					<Zone index={i} select={this.onSelectTitle.bind(this)}
+						isSelected={selected} currentZone={zone} /> 
 				</li>
 			)
 	
@@ -102,3 +113,5 @@ class Zones extends Component {
 }
 
 export default Zones;
+
+/// progress 1:28:12

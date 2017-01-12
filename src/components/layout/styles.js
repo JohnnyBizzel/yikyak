@@ -25,7 +25,7 @@ export default {
         },
         title: {
             textDecoration:'none',
-            color:'green'
+            color:'#DF0174'
         }    
     }
     

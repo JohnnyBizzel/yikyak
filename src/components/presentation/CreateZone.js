@@ -21,8 +21,7 @@ class CreateZone extends Component {
         let updatedZone = Object.assign({}, this.state.zone);
         updatedZone[event.target.id] = event.target.value;
        
-		
-
+	
         this.setState({
             zone: updatedZone
         });

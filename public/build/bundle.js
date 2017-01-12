@@ -21916,6 +21916,8 @@
 	var Zones = function (_Component) {
 		_inherits(Zones, _Component);
 	
+		// This state needs sharing with Comments
+		// This is where REDUX comes in to save the day :)
 		function Zones() {
 			_classCallCheck(this, Zones);
 	
@@ -21993,15 +21995,25 @@
 	   })*/
 			}
 		}, {
+			key: 'onSelectTitle',
+			value: function onSelectTitle(index) {
+				console.log("Selected Zone status");
+				this.setState({ selected: index });
+			}
+		}, {
 			key: 'render',
 			value: function render() {
+				var _this4 = this;
+	
 				//const listItems = this.state.list.map((zone,i)=>{
 	
 				var listItems = this.state.list.map(function (zone, i) {
+					var selected = i == _this4.state.selected;
 					return _react2.default.createElement(
 						'li',
 						{ key: i },
-						_react2.default.createElement(_Zone2.default, { currentZone: zone })
+						_react2.default.createElement(_Zone2.default, { index: i, select: _this4.onSelectTitle.bind(_this4),
+							isSelected: selected, currentZone: zone })
 					);
 				});
 				return _react2.default.createElement(
@@ -22021,6 +22033,8 @@
 	}(_react.Component);
 	
 	exports.default = Zones;
+	
+	/// progress 1:28:12
 
 /***/ },
 /* 185 */
@@ -22062,22 +22076,38 @@
 	    }
 	
 	    _createClass(Zone, [{
+	        key: 'onSelectTitle',
+	        value: function onSelectTitle(event) {
+	            event.preventDefault();
+	            console.log('onSelectTitle index: ' + this.props.index);
+	            this.props.select(this.props.index);
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
 	
 	            var zoneStyle = _styles2.default.zone; // needs to be inside the render func!
 	            var zipCode1 = this.props.currentZone.zipCodes[0];
+	            var title = this.props.isSelected ? _react2.default.createElement(
+	                'a',
+	                { style: zoneStyle.title, href: '#' },
+	                this.props.currentZone.name
+	            ) : _react2.default.createElement(
+	                'a',
+	                { href: '#' },
+	                this.props.currentZone.name
+	            );
+	            // replaces:
+	            // <a style={zoneStyle.title} href="#">{this.props.currentZone.name}</a>
+	
+	
 	            return _react2.default.createElement(
 	                'div',
 	                { style: zoneStyle.container },
 	                _react2.default.createElement(
 	                    'h2',
-	                    { style: zoneStyle.header },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { style: zoneStyle.title, href: '#' },
-	                        this.props.currentZone.name
-	                    )
+	                    { onClick: this.onSelectTitle.bind(this), style: zoneStyle.header },
+	                    title
 	                ),
 	                _react2.default.createElement(
 	                    'span',
@@ -22134,7 +22164,7 @@
 	        },
 	        title: {
 	            textDecoration: 'none',
-	            color: 'green'
+	            color: '#DF0174'
 	        }
 	    }
 	
